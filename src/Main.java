@@ -3,9 +3,7 @@ import org.lwjgl.Sys;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.DoubleBuffer;
 import java.util.*;
@@ -102,7 +100,9 @@ class Sight {
         StringBuilder shaderSource = new StringBuilder();
         int shaderId;
         try {
-            BufferedReader reader = new BufferedReader(new FileReader(filename));
+            InputStream is = getClass().getResourceAsStream(filename);
+            InputStreamReader isr = new  InputStreamReader(is);
+            BufferedReader reader = new BufferedReader(isr);
             String line;
             while ((line = reader.readLine()) != null)
                 shaderSource.append(line).append("\n");
@@ -345,7 +345,7 @@ public class Main {
         window = glfwCreateWindow(WIDTH, HEIGHT, "Light", NULL, NULL);
         if (window == NULL)
             throw new RuntimeException("Failed to create the GLFW window");
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         glfwSetKeyCallback(window, keyCallback = new GLFWKeyCallback() {
             @Override
             public void invoke(long window, int key, int scanCode, int action, int mods) {
