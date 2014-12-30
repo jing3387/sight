@@ -345,19 +345,12 @@ public class Main {
         window = glfwCreateWindow(WIDTH, HEIGHT, "Light", NULL, NULL);
         if (window == NULL)
             throw new RuntimeException("Failed to create the GLFW window");
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
         glfwSetKeyCallback(window, keyCallback = new GLFWKeyCallback() {
             @Override
             public void invoke(long window, int key, int scanCode, int action, int mods) {
                 if (key == GLFW_KEY_ESCAPE)
                     glfwSetWindowShouldClose(window, GL_TRUE);
-                if (key == GLFW_KEY_W)
-                    sight.moveLight(0.0, 0.01);
-                if (key == GLFW_KEY_S)
-                    sight.moveLight(0.0, -0.01);
-                if (key == GLFW_KEY_A)
-                    sight.moveLight(-0.01, 0.0);
-                if (key == GLFW_KEY_D)
-                    sight.moveLight(0.01, 0.0);
             }
         });
         ByteBuffer vidMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
@@ -372,19 +365,35 @@ public class Main {
     }
 
     private void loop() {
+        DoubleBuffer mouseX = BufferUtils.createDoubleBuffer(1);
+        DoubleBuffer mouseY = BufferUtils.createDoubleBuffer(1);
         GLContext.createFromCurrent();
         sight = new Sight();
         ArrayList<Block> blocks = new ArrayList<Block>();
         blocks.add(new Block(-0.5, 0.5, 0.2));
         blocks.add(new Block(0.5, -0.5, 0.2));
-        sight.loadMap(0.1, blocks);
-        sight.setLightLocation(0.0, 0.0);
+        double margin = 0.1;
+        sight.loadMap(margin, blocks);
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         while (glfwWindowShouldClose(window) == GL_FALSE) {
+            glfwPollEvents();
+            glfwGetCursorPos(window, mouseX, mouseY);
+            double x = mouseX.get();
+            double y = mouseY.get();
+            if (x < 0 + 800*margin)
+                x = 0 + 800*margin;
+            if (x > 800 - 800*margin)
+                x = 800 - 800*margin;
+            if (y < 0 + 600*margin)
+                y = 0 + 600*margin;
+            if (y > 600 - 600*margin)
+                y = 600 - 600*margin;
+            sight.setLightLocation(2.0*x/800-1.0, -(2.0*y/600-1.0));
+            mouseX.rewind();
+            mouseY.rewind();
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             sight.render();
             glfwSwapBuffers(window);
-            glfwPollEvents();
         }
     }
 
